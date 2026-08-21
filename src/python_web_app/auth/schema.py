@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from python_web_app.common.schema import SnakeModel
+from python_web_app.common.model import SnakeModel
 
 
 class RegisterRequest(BaseModel):
