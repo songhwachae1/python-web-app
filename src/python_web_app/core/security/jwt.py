@@ -27,7 +27,7 @@ class TokenPair:
 
 class TokenClaims(BaseModel):
     sub: str
-    role: str
+    role: str | None = None
     iat: int
     exp: int
     jti: str
@@ -39,7 +39,7 @@ class TokenType(StrEnum):
 
 
 def _issue_token(
-        private_key_pem: str,
+        private_key: str,
         key_id: str,
         payload: dict[str, Any],
 ) -> str:
@@ -48,7 +48,7 @@ def _issue_token(
         "typ": "JWT"
     }
 
-    return jwt.encode(payload, private_key_pem, algorithm=ALG, headers=headers)
+    return jwt.encode(payload, private_key, algorithm=ALG, headers=headers)
 
 
 def _build_token_payload(
@@ -77,16 +77,16 @@ def _build_token_payload(
 def issue_token_pair(
         sub: str, 
         role: str, 
-        private_key_pem: str,
+        private_key: str,
         key_id: str) -> TokenPair:
     access_token = _issue_token(
-        private_key_pem, 
+        private_key, 
         key_id, 
         _build_token_payload(sub, TokenType.ACCESS, ACCESS_TOKEN_TTL, role)
     )
 
     refresh_token = _issue_token(
-        private_key_pem, 
+        private_key, 
         key_id, 
         _build_token_payload(sub, TokenType.REFRESH, REFRESH_TOKEN_TTL)
     )
@@ -97,3 +97,23 @@ def issue_token_pair(
         expires_in=ACCESS_TOKEN_TTL * 60, 
         token_type="Bearer"
     )
+
+
+def verify_token(
+        token: str,
+        public_key: str,
+        expected_type: str,
+    ) -> TokenClaims:
+    payload = jwt.decode(
+        token, 
+        public_key, 
+        algorithms=[ALG], 
+        issuer=ISSUER, 
+        audience=AUDIENCE,
+        leeway=CLOCK_SKEW_LEEWAY,
+        options={"require": ["sub", "type", "jti", "iat", "exp"]}
+    )
+
+    #if expected_type != payload.get("type"):
+    claims = TokenClaims.model_validate(payload)
+    return claims
