@@ -15,10 +15,10 @@ ISSUER = settings.JWT_ISSUER
 AUDIENCE = settings.JWT_AUDIENCE
 ACCESS_TOKEN_TTL = timedelta(minutes=settings.ACCESS_TOKEN_MTL)
 REFRESH_TOKEN_TTL = timedelta(days=settings.REFRESH_TOKEN_DTL)
-CLOCK_SKEW_LEEWAY = timedelta(days=settings.CLOCK_SKEW_LEEWAY)
+CLOCK_SKEW_LEEWAY = timedelta(seconds=settings.CLOCK_SKEW_LEEWAY)
 
 
-class TokenPair:
+class TokenPair(BaseModel):
     access_token: str
     refresh_token: str
     expires_in: int
@@ -94,7 +94,7 @@ def issue_token_pair(
     return TokenPair(
         access_token=access_token, 
         refresh_token=refresh_token, 
-        expires_in=ACCESS_TOKEN_TTL * 60, 
+        expires_in=settings.ACCESS_TOKEN_MTL * 60, 
         token_type="Bearer"
     )
 

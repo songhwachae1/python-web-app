@@ -4,6 +4,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     JWT_ALGORITHM: str = "ES256"
+    JWT_PRIVATE_KEY: str
+    JWT_PUBLIC_KEY: str
     JWT_ISSUER: str
     JWT_AUDIENCE: str
     ACCESS_TOKEN_MTL: int = 15
